@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+'use client';
+
+import {useState} from 'react';
 import {
   View,
   Text,
@@ -8,15 +10,18 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useSession} from '../../contexts/SessionContext';
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const {refreshSession} = useSession();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -26,27 +31,38 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
+      // Sign in with Firebase Auth
       await auth().signInWithEmailAndPassword(email, password);
+
+      // Initialize session
+      await refreshSession();
     } catch (error) {
       Alert.alert('Login Failed', error.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue your mentoring journey</Text>
+          <Text style={styles.subtitle}>
+            Sign in to continue your mentoring journey
+          </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Icon name="email" size={20} color="#6b7280" style={styles.inputIcon} />
+            <Icon
+              name="email"
+              size={20}
+              color="#6b7280"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Email"
@@ -58,7 +74,12 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           <View style={styles.inputContainer}>
-            <Icon name="lock" size={20} color="#6b7280" style={styles.inputIcon} />
+            <Icon
+              name="lock"
+              size={20}
+              color="#6b7280"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -66,14 +87,13 @@ export default function LoginScreen({ navigation }) {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
-            >
-              <Icon 
-                name={showPassword ? "visibility" : "visibility-off"} 
-                size={20} 
-                color="#6b7280" 
+              style={styles.eyeIcon}>
+              <Icon
+                name={showPassword ? 'visibility' : 'visibility-off'}
+                size={20}
+                color="#6b7280"
               />
             </TouchableOpacity>
           </View>
@@ -81,17 +101,17 @@ export default function LoginScreen({ navigation }) {
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.loginButtonText}>
-              {loading ? 'Signing In...' : 'Sign In'}
-            </Text>
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.forgotPassword}
-            onPress={() => navigation.navigate('ForgotPassword')}
-          >
+            onPress={() => navigation.navigate('ForgotPassword')}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
         </View>

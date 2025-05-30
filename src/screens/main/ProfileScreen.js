@@ -22,6 +22,9 @@ import {
   uploadImageToCloudinary,
   getOptimizedImageUrl,
 } from '../../utils/cloudinaryConfig';
+import SessionManager from '../../components/SessionManager';
+// Đảm bảo import đúng đường dẫn
+import {useSession} from '../../contexts/SessionContext';
 
 export default function ProfileScreen({navigation}) {
   const [user, setUser] = useState(null);
@@ -30,6 +33,7 @@ export default function ProfileScreen({navigation}) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
+  const [sessionManagerVisible, setSessionManagerVisible] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [stats, setStats] = useState({
@@ -44,6 +48,13 @@ export default function ProfileScreen({navigation}) {
     sessions: true,
     marketing: false,
   });
+
+  // Session management - Thêm giá trị mặc định để tránh lỗi
+  const {
+    activeSessions = [],
+    endSession = () => {},
+    endAllOtherSessions = () => {},
+  } = useSession() || {};
 
   const skills = [
     'JavaScript',
@@ -266,7 +277,7 @@ export default function ProfileScreen({navigation}) {
       }, 200);
 
       // Try primary upload method first
-      let uploadResult = await uploadImageToCloudinary(
+      const uploadResult = await uploadImageToCloudinary(
         asset.uri,
         'mentor_connect/profile_images',
       );
@@ -354,6 +365,10 @@ export default function ProfileScreen({navigation}) {
         style: 'destructive',
         onPress: async () => {
           try {
+            // Kiểm tra endSession tồn tại trước khi gọi
+            if (typeof endSession === 'function') {
+              await endSession();
+            }
             await auth().signOut();
           } catch (error) {
             Alert.alert('Error', 'Failed to sign out');
@@ -361,6 +376,32 @@ export default function ProfileScreen({navigation}) {
         },
       },
     ]);
+  };
+
+  const handleSignOutAllDevices = () => {
+    Alert.alert(
+      'Sign Out All Devices',
+      'This will sign you out from all devices. You will need to sign in again on all devices.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Sign Out All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Kiểm tra endAllOtherSessions tồn tại trước khi gọi
+              if (typeof endAllOtherSessions === 'function') {
+                await endAllOtherSessions();
+              }
+              await auth().signOut();
+              Alert.alert('Success', 'Signed out from all devices');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to sign out from all devices');
+            }
+          },
+        },
+      ],
+    );
   };
 
   const updateNotificationSettings = async newSettings => {
@@ -661,11 +702,23 @@ export default function ProfileScreen({navigation}) {
         <Icon name="chevron-right" size={20} color="#6b7280" />
       </TouchableOpacity>
 
-      {/* <TouchableOpacity style={styles.menuItem}>
-        <Icon name="payment" size={24} color="#6b7280" />
-        <Text style={styles.menuText}>Payment Methods</Text>
-        <Icon name="chevron-right" size={20} color="#6b7280" />
-      </TouchableOpacity> */}
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => setSessionManagerVisible(true)}>
+        <Icon name="devices" size={24} color="#6b7280" />
+        <Text style={styles.menuText}>Active Sessions</Text>
+        <View style={styles.sessionBadgeContainer}>
+          {/* Kiểm tra activeSessions trước khi truy cập length */}
+          {activeSessions && activeSessions.length > 1 && (
+            <View style={styles.sessionBadge}>
+              <Text style={styles.sessionBadgeText}>
+                {activeSessions.length}
+              </Text>
+            </View>
+          )}
+          <Icon name="chevron-right" size={20} color="#6b7280" />
+        </View>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.menuItem}
@@ -674,12 +727,6 @@ export default function ProfileScreen({navigation}) {
         <Text style={styles.menuText}>Settings</Text>
         <Icon name="chevron-right" size={20} color="#6b7280" />
       </TouchableOpacity>
-
-      {/* <TouchableOpacity style={styles.menuItem}>
-        <Icon name="help" size={24} color="#6b7280" />
-        <Text style={styles.menuText}>Help & Support</Text>
-        <Icon name="chevron-right" size={20} color="#6b7280" />
-      </TouchableOpacity> */}
 
       <TouchableOpacity
         style={[styles.menuItem, styles.signOutItem]}
@@ -736,6 +783,12 @@ export default function ProfileScreen({navigation}) {
         {renderPricingSection()}
         {!editMode && renderMenuItems()}
       </ScrollView>
+
+      {/* Session Manager Modal */}
+      <SessionManager
+        visible={sessionManagerVisible}
+        onClose={() => setSessionManagerVisible(false)}
+      />
 
       {/* Settings Modal */}
       <Modal
@@ -805,6 +858,19 @@ export default function ProfileScreen({navigation}) {
             </View>
 
             <View style={styles.settingsSection}>
+              <Text style={styles.settingsSectionTitle}>Security</Text>
+
+              <TouchableOpacity
+                style={styles.settingButton}
+                onPress={handleSignOutAllDevices}>
+                <Text style={[styles.settingButtonText, {color: '#ef4444'}]}>
+                  Sign Out All Devices
+                </Text>
+                <Icon name="chevron-right" size={20} color="#ef4444" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.settingsSection}>
               <Text style={styles.settingsSectionTitle}>Privacy</Text>
 
               <TouchableOpacity style={styles.settingButton}>
@@ -825,14 +891,6 @@ export default function ProfileScreen({navigation}) {
                 <Text style={styles.settingButtonText}>Change Password</Text>
                 <Icon name="chevron-right" size={20} color="#6b7280" />
               </TouchableOpacity>
-
-              {/* <TouchableOpacity
-                style={[styles.settingButton, styles.dangerButton]}>
-                <Text style={[styles.settingButtonText, styles.dangerText]}>
-                  Delete Account
-                </Text>
-                <Icon name="chevron-right" size={20} color="#ef4444" />
-              </TouchableOpacity> */}
             </View>
           </ScrollView>
         </View>
@@ -1136,6 +1194,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     marginLeft: 12,
+  },
+  sessionBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sessionBadge: {
+    backgroundColor: '#ef4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  sessionBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   signOutItem: {
     borderBottomWidth: 0,

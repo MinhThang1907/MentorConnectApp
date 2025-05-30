@@ -1,4 +1,6 @@
-import React, {useState, useEffect} from 'react';
+'use client';
+
+import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import auth from '@react-native-firebase/auth';
@@ -8,15 +10,17 @@ import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 import LoadingScreen from './src/screens/LoadingScreen';
 import RoleSelectionScreen from './src/screens/auth/RoleSelectionScreen';
+import {SessionProvider, useSession} from './src/contexts/SessionContext';
+import SessionGuard from './src/components/SessionGuard';
 
 const Stack = createStackNavigator();
 
-export default function App() {
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userListener, setUserListener] = useState(null);
+function AppContent() {
+  const [initializing, setInitializing] = React.useState(true);
+  const [user, setUser] = React.useState(null);
+  const [userRole, setUserRole] = React.useState(null);
+  const [userListener, setUserListener] = React.useState(null);
+  const {sessionValid, loading: sessionLoading} = useSession();
 
   // Handle user state changes
   function onAuthStateChanged(user) {
@@ -31,20 +35,16 @@ export default function App() {
           doc => {
             if (doc.exists) {
               const userData = doc.data();
-              console.log('User data updated:', userData);
               setUserRole(userData.role || null);
             } else {
-              console.log('User document does not exist');
               setUserRole(null);
             }
 
             if (initializing) setInitializing(false);
-            setLoading(false);
           },
           error => {
             console.error('Error listening to user document:', error);
             if (initializing) setInitializing(false);
-            setLoading(false);
           },
         );
 
@@ -59,11 +59,10 @@ export default function App() {
 
       setUserRole(null);
       if (initializing) setInitializing(false);
-      setLoading(false);
     }
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
 
     // Clean up on unmount
@@ -75,7 +74,7 @@ export default function App() {
     };
   }, []);
 
-  if (loading) {
+  if (initializing || sessionLoading) {
     return <LoadingScreen />;
   }
 
@@ -94,9 +93,23 @@ export default function App() {
           />
         ) : (
           // User is logged in and has a role
-          <Stack.Screen name="App" component={AppNavigator} />
+          <Stack.Screen name="App">
+            {() => (
+              <SessionGuard>
+                <AppNavigator />
+              </SessionGuard>
+            )}
+          </Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <SessionProvider>
+      <AppContent />
+    </SessionProvider>
   );
 }
