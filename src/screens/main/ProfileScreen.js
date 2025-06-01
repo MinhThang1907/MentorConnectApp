@@ -23,7 +23,6 @@ import {
   getOptimizedImageUrl,
 } from '../../utils/cloudinaryConfig';
 import SessionManager from '../../components/SessionManager';
-// Đảm bảo import đúng đường dẫn
 import {useSession} from '../../contexts/SessionContext';
 
 export default function ProfileScreen({navigation}) {
@@ -94,7 +93,7 @@ export default function ProfileScreen({navigation}) {
         .doc(currentUser.uid)
         .get();
 
-      if (userDoc.exists) {
+      if (userDoc.exists()) {
         const userData = userDoc.data();
         setUser(userData);
         setEditData(userData);
@@ -172,7 +171,7 @@ export default function ProfileScreen({navigation}) {
         .doc(currentUser.uid)
         .get();
 
-      if (settingsDoc.exists) {
+      if (settingsDoc.exists()) {
         setNotifications(settingsDoc.data().notifications || notifications);
       }
     } catch (error) {

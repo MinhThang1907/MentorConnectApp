@@ -27,7 +27,6 @@ export default function RoleSelectionScreen() {
       });
 
       console.log('Role updated successfully in Firestore');
-      // No need to navigate - App.jsx will handle navigation based on user role
     } catch (error) {
       console.error('Error updating role:', error);
       Alert.alert('Error', 'Failed to update role. Please try again.');

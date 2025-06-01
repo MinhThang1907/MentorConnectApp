@@ -1,124 +1,124 @@
-"use client"
+'use client';
 
-import { createContext, useContext, useEffect, useState } from "react"
-import auth from "@react-native-firebase/auth"
-import firestore from "@react-native-firebase/firestore"
-import tokenService from "../services/tokenService"
+import {createContext, useContext, useEffect, useState} from 'react';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import tokenService from '../services/tokenService';
 
-const AuthContext = createContext({})
+const AuthContext = createContext({});
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context
-}
+  return context;
+};
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [userRole, setUserRole] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [tokens, setTokens] = useState(null)
-  const [sessionValid, setSessionValid] = useState(false)
+export const AuthProvider = ({children}) => {
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [tokens, setTokens] = useState(null);
+  const [sessionValid, setSessionValid] = useState(false);
 
   useEffect(() => {
-    initializeAuth()
-  }, [])
+    initializeAuth();
+  }, []);
 
   const initializeAuth = async () => {
     try {
       // Initialize device ID
-      await tokenService.initializeDeviceId()
+      await tokenService.initializeDeviceId();
 
       // Check for stored tokens
-      const storedTokens = await tokenService.getStoredTokens()
+      const storedTokens = await tokenService.getStoredTokens();
 
       if (storedTokens) {
         // Validate session
-        const isValid = await tokenService.validateSession()
+        const isValid = await tokenService.validateSession();
 
         if (isValid) {
           // Try to get valid access token (will refresh if needed)
           try {
-            const validToken = await tokenService.getValidAccessToken()
+            const validToken = await tokenService.getValidAccessToken();
             setTokens({
               accessToken: validToken,
               refreshToken: storedTokens.refreshToken,
-            })
-            setSessionValid(true)
+            });
+            setSessionValid(true);
           } catch (error) {
-            console.log("Token refresh failed, requiring re-login")
-            await tokenService.clearTokens()
+            console.log('Token refresh failed, requiring re-login');
+            await tokenService.clearTokens();
           }
         } else {
           // Session is invalid, clear tokens
-          await tokenService.clearTokens()
+          await tokenService.clearTokens();
         }
       }
 
       // Set up Firebase auth listener
-      const unsubscribe = auth().onAuthStateChanged(onAuthStateChanged)
+      const unsubscribe = auth().onAuthStateChanged(onAuthStateChanged);
 
-      return unsubscribe
+      return unsubscribe;
     } catch (error) {
-      console.error("Error initializing auth:", error)
-      setLoading(false)
+      console.error('Error initializing auth:', error);
+      setLoading(false);
     }
-  }
+  };
 
-  const onAuthStateChanged = async (firebaseUser) => {
+  const onAuthStateChanged = async firebaseUser => {
     try {
       if (firebaseUser) {
         // Set up user document listener
         const unsubscribeUser = firestore()
-          .collection("users")
+          .collection('users')
           .doc(firebaseUser.uid)
           .onSnapshot(
-            async (doc) => {
-              if (doc.exists) {
-                const userData = doc.data()
+            async doc => {
+              if (doc.exists()) {
+                const userData = doc.data();
                 setUser({
                   uid: firebaseUser.uid,
                   email: firebaseUser.email,
                   ...userData,
-                })
-                setUserRole(userData.role || null)
+                });
+                setUserRole(userData.role || null);
 
                 // Generate tokens if we don't have valid ones
                 if (!sessionValid) {
-                  await generateTokens(firebaseUser, userData)
+                  await generateTokens(firebaseUser, userData);
                 }
               } else {
-                setUser(null)
-                setUserRole(null)
-                await tokenService.clearTokens()
-                setTokens(null)
-                setSessionValid(false)
+                setUser(null);
+                setUserRole(null);
+                await tokenService.clearTokens();
+                setTokens(null);
+                setSessionValid(false);
               }
-              setLoading(false)
+              setLoading(false);
             },
-            (error) => {
-              console.error("Error listening to user document:", error)
-              setLoading(false)
+            error => {
+              console.error('Error listening to user document:', error);
+              setLoading(false);
             },
-          )
+          );
 
-        return unsubscribeUser
+        return unsubscribeUser;
       } else {
         // User is signed out
-        setUser(null)
-        setUserRole(null)
-        await tokenService.clearTokens()
-        setTokens(null)
-        setSessionValid(false)
-        setLoading(false)
+        setUser(null);
+        setUserRole(null);
+        await tokenService.clearTokens();
+        setTokens(null);
+        setSessionValid(false);
+        setLoading(false);
       }
     } catch (error) {
-      console.error("Error in auth state change:", error)
-      setLoading(false)
+      console.error('Error in auth state change:', error);
+      setLoading(false);
     }
-  }
+  };
 
   const generateTokens = async (firebaseUser, userData) => {
     try {
@@ -126,142 +126,148 @@ export const AuthProvider = ({ children }) => {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
         role: userData.role,
-      })
+      });
 
       const refreshToken = tokenService.generateRefreshToken({
         uid: firebaseUser.uid,
-      })
+      });
 
-      await tokenService.storeTokens(accessToken, refreshToken)
+      await tokenService.storeTokens(accessToken, refreshToken);
 
-      setTokens({ accessToken, refreshToken })
-      setSessionValid(true)
+      setTokens({accessToken, refreshToken});
+      setSessionValid(true);
     } catch (error) {
-      console.error("Error generating tokens:", error)
+      console.error('Error generating tokens:', error);
     }
-  }
+  };
 
   const signIn = async (email, password) => {
     try {
-      setLoading(true)
-      const userCredential = await auth().signInWithEmailAndPassword(email, password)
+      setLoading(true);
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password,
+      );
 
       // Tokens will be generated in the auth state change listener
-      return userCredential
+      return userCredential;
     } catch (error) {
-      setLoading(false)
-      throw error
+      setLoading(false);
+      throw error;
     }
-  }
+  };
 
   const signUp = async (email, password, userData) => {
     try {
-      setLoading(true)
-      const userCredential = await auth().createUserWithEmailAndPassword(email, password)
+      setLoading(true);
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password,
+      );
 
       // Create user document
       await firestore()
-        .collection("users")
+        .collection('users')
         .doc(userCredential.user.uid)
         .set({
           ...userData,
           email,
           createdAt: firestore.FieldValue.serverTimestamp(),
           updatedAt: firestore.FieldValue.serverTimestamp(),
-        })
+        });
 
-      return userCredential
+      return userCredential;
     } catch (error) {
-      setLoading(false)
-      throw error
+      setLoading(false);
+      throw error;
     }
-  }
+  };
 
   const signOut = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
       // Deactivate current session
-      await tokenService.deactivateSession()
+      await tokenService.deactivateSession();
 
       // Clear tokens
-      await tokenService.clearTokens()
+      await tokenService.clearTokens();
 
       // Sign out from Firebase
-      await auth().signOut()
+      await auth().signOut();
 
-      setTokens(null)
-      setSessionValid(false)
+      setTokens(null);
+      setSessionValid(false);
     } catch (error) {
-      console.error("Error signing out:", error)
-      throw error
+      console.error('Error signing out:', error);
+      throw error;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const signOutAllDevices = async () => {
     try {
-      if (!user) return
+      if (!user) return;
 
-      setLoading(true)
+      setLoading(true);
 
       // Logout from all devices
-      await tokenService.logoutAllDevices(user.uid)
+      await tokenService.logoutAllDevices(user.uid);
 
       // Clear local tokens
-      await tokenService.clearTokens()
+      await tokenService.clearTokens();
 
       // Sign out from Firebase
-      await auth().signOut()
+      await auth().signOut();
 
-      setTokens(null)
-      setSessionValid(false)
+      setTokens(null);
+      setSessionValid(false);
     } catch (error) {
-      console.error("Error signing out all devices:", error)
-      throw error
+      console.error('Error signing out all devices:', error);
+      throw error;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getValidToken = async () => {
     try {
-      return await tokenService.getValidAccessToken()
+      return await tokenService.getValidAccessToken();
     } catch (error) {
-      console.error("Error getting valid token:", error)
+      console.error('Error getting valid token:', error);
       // If token refresh fails, sign out user
-      await signOut()
-      throw error
+      await signOut();
+      throw error;
     }
-  }
+  };
 
   const getUserSessions = async () => {
-    if (!user) return []
-    return await tokenService.getUserSessions(user.uid)
-  }
+    if (!user) return [];
+    return await tokenService.getUserSessions(user.uid);
+  };
 
-  const logoutDevice = async (deviceId) => {
-    if (!user) return
-    await tokenService.logoutDevice(user.uid, deviceId)
-  }
+  const logoutDevice = async deviceId => {
+    if (!user) return;
+    await tokenService.logoutDevice(user.uid, deviceId);
+  };
 
-  const updateUserRole = async (role) => {
+  const updateUserRole = async role => {
     try {
-      if (!user) return
+      if (!user) return;
 
-      await firestore().collection("users").doc(user.uid).update({
+      await firestore().collection('users').doc(user.uid).update({
         role,
         updatedAt: firestore.FieldValue.serverTimestamp(),
-      })
+      });
 
       // Regenerate tokens with new role
-      await generateTokens(auth().currentUser, { ...user, role })
+      await generateTokens(auth().currentUser, {...user, role});
     } catch (error) {
-      console.error("Error updating user role:", error)
-      throw error
+      console.error('Error updating user role:', error);
+      throw error;
     }
-  }
+  };
 
   const value = {
     user,
@@ -277,7 +283,7 @@ export const AuthProvider = ({ children }) => {
     getUserSessions,
     logoutDevice,
     updateUserRole,
-  }
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 
 // Auth Screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
@@ -15,8 +15,8 @@ export default function AuthNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#f9fafb' },
-        cardStyleInterpolator: ({ current, layouts }) => {
+        cardStyle: {backgroundColor: '#f9fafb'},
+        cardStyleInterpolator: ({current, layouts}) => {
           return {
             cardStyle: {
               transform: [
@@ -30,38 +30,37 @@ export default function AuthNavigator() {
             },
           };
         },
-      }}
-    >
-      <Stack.Screen 
-        name="Welcome" 
+      }}>
+      <Stack.Screen
+        name="Welcome"
         component={WelcomeScreen}
         options={{
           gestureEnabled: false,
         }}
       />
-      <Stack.Screen 
-        name="Login" 
+      <Stack.Screen
+        name="Login"
         component={LoginScreen}
         options={{
           gestureEnabled: true,
         }}
       />
-      <Stack.Screen 
-        name="Register" 
+      <Stack.Screen
+        name="Register"
         component={RegisterScreen}
         options={{
           gestureEnabled: true,
         }}
       />
-      <Stack.Screen 
-        name="ForgotPassword" 
+      <Stack.Screen
+        name="ForgotPassword"
         component={ForgotPasswordScreen}
         options={{
           gestureEnabled: true,
         }}
       />
-      <Stack.Screen 
-        name="RoleSelection" 
+      <Stack.Screen
+        name="RoleSelection"
         component={RoleSelectionScreen}
         options={{
           gestureEnabled: false, // Prevent going back after registration

@@ -1,14 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {View, Text, StyleSheet, Animated, Dimensions} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 export default function LoadingScreen() {
   const spinValue = useRef(new Animated.Value(0)).current;
@@ -36,7 +30,7 @@ export default function LoadingScreen() {
         toValue: 1,
         duration: 2000,
         useNativeDriver: true,
-      })
+      }),
     );
     spinAnimation.start();
 
@@ -52,23 +46,18 @@ export default function LoadingScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
+      <Animated.View
         style={[
           styles.content,
           {
             opacity: fadeValue,
-            transform: [{ scale: scaleValue }]
-          }
-        ]}
-      >
+            transform: [{scale: scaleValue}],
+          },
+        ]}>
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <Animated.View 
-            style={[
-              styles.logoIcon,
-              { transform: [{ rotate: spin }] }
-            ]}
-          >
+          <Animated.View
+            style={[styles.logoIcon, {transform: [{rotate: spin}]}]}>
             <Icon name="school" size={40} color="#fff" />
           </Animated.View>
           <Text style={styles.logoText}>MentorConnect</Text>
@@ -76,12 +65,8 @@ export default function LoadingScreen() {
 
         {/* Loading Indicator */}
         <View style={styles.loadingContainer}>
-          <Animated.View 
-            style={[
-              styles.spinner,
-              { transform: [{ rotate: spin }] }
-            ]}
-          >
+          <Animated.View
+            style={[styles.spinner, {transform: [{rotate: spin}]}]}>
             <View style={styles.spinnerInner} />
           </Animated.View>
           <Text style={styles.loadingText}>Loading...</Text>
@@ -95,26 +80,26 @@ export default function LoadingScreen() {
 
       {/* Background Elements */}
       <View style={styles.backgroundElements}>
-        <Animated.View 
+        <Animated.View
           style={[
             styles.backgroundCircle,
             styles.circle1,
-            { transform: [{ rotate: spin }] }
-          ]} 
+            {transform: [{rotate: spin}]},
+          ]}
         />
-        <Animated.View 
+        <Animated.View
           style={[
             styles.backgroundCircle,
             styles.circle2,
-            { transform: [{ rotate: spin }] }
-          ]} 
+            {transform: [{rotate: spin}]},
+          ]}
         />
-        <Animated.View 
+        <Animated.View
           style={[
             styles.backgroundCircle,
             styles.circle3,
-            { transform: [{ rotate: spin }] }
-          ]} 
+            {transform: [{rotate: spin}]},
+          ]}
         />
       </View>
     </View>

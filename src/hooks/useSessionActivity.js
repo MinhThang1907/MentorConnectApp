@@ -1,39 +1,45 @@
-"use client"
+'use client';
 
-import { useEffect, useRef } from "react"
-import { AppState } from "react-native"
-import { useSession } from "../contexts/SessionContext"
+import {useEffect, useRef} from 'react';
+import {AppState} from 'react-native';
+import {useSession} from '../contexts/SessionContext';
 
 export const useSessionActivity = () => {
-  const { refreshSession, sessionValid } = useSession()
-  const appState = useRef(AppState.currentState)
-  const activityTimeout = useRef(null)
+  const {refreshSession, sessionValid} = useSession();
+  const appState = useRef(AppState.currentState);
+  const activityTimeout = useRef(null);
 
   useEffect(() => {
     // Handle app state changes
-    const subscription = AppState.addEventListener("change", handleAppStateChange)
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
 
     return () => {
-      subscription?.remove()
+      subscription?.remove();
       if (activityTimeout.current) {
-        clearTimeout(activityTimeout.current)
+        clearTimeout(activityTimeout.current);
       }
-    }
-  }, [sessionValid])
+    };
+  }, [sessionValid]);
 
-  const handleAppStateChange = (nextAppState) => {
-    if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+  const handleAppStateChange = nextAppState => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
       // App has come to the foreground
       if (sessionValid) {
         // Refresh session when app becomes active
-        refreshSession()
+        refreshSession();
       }
     }
 
-    appState.current = nextAppState
-  }
+    appState.current = nextAppState;
+  };
 
   return {
     refreshSession,
-  }
-}
+  };
+};

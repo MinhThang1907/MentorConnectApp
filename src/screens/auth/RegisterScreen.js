@@ -58,14 +58,9 @@ export default function RegisterScreen({navigation}) {
         email,
         createdAt: firestore.FieldValue.serverTimestamp(),
         updatedAt: firestore.FieldValue.serverTimestamp(),
-        // Note: We're not setting the role here, it will be set in RoleSelectionScreen
       });
 
-      // No need to navigate manually - App.jsx will handle navigation based on user role
       console.log('User registered successfully');
-
-      // Optional: Show success message
-      // Alert.alert('Success', 'Registration successful! Please select your role.');
     } catch (error) {
       let errorMessage = 'Registration failed';
 

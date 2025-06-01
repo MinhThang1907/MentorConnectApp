@@ -59,6 +59,7 @@ export default function CalendarScreen({navigation}) {
   };
 
   const fetchSessions = async () => {
+    setLoading(true);
     try {
       const currentUser = auth().currentUser;
       const sessionsSnapshot = await firestore()
@@ -82,7 +83,7 @@ export default function CalendarScreen({navigation}) {
             .doc(otherParticipantId)
             .get();
 
-          if (userDoc.exists) {
+          if (userDoc.exists()) {
             session.otherUser = {id: otherParticipantId, ...userDoc.data()};
           }
         }
@@ -390,6 +391,8 @@ export default function CalendarScreen({navigation}) {
           keyExtractor={item => item.id}
           contentContainerStyle={styles.sessionsList}
           showsVerticalScrollIndicator={false}
+          onRefresh={fetchSessions}
+          refreshing={loading}
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Icon name="event-available" size={48} color="#d1d5db" />

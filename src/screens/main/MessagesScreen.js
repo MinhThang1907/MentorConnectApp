@@ -51,7 +51,7 @@ export default function MessagesScreen({navigation}) {
               .doc(otherParticipantId)
               .get();
 
-            if (userDoc.exists) {
+            if (userDoc.exists()) {
               conversation.otherUser = {
                 id: otherParticipantId,
                 ...userDoc.data(),

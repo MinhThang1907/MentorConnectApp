@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,13 @@ import {
   Image,
   Animated,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-export default function WelcomeScreen({ navigation }) {
+export default function WelcomeScreen({navigation}) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -39,123 +40,126 @@ export default function WelcomeScreen({ navigation }) {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Background Gradient Effect */}
-      <View style={styles.backgroundGradient} />
-      
-      {/* Header Section */}
-      <Animated.View 
-        style={[
-          styles.header,
-          {
-            opacity: fadeAnim,
-            transform: [
-              { translateY: slideAnim },
-              { scale: scaleAnim }
-            ]
-          }
-        ]}
-      >
-        <View style={styles.logoContainer}>
-          <View style={styles.logoIcon}>
-            <Icon name="school" size={40} color="#fff" />
-          </View>
-          <Text style={styles.logoText}>MentorConnect</Text>
-        </View>
-        
-        <Text style={styles.tagline}>
-          Connect, Learn, and Grow Together
-        </Text>
-      </Animated.View>
+    <ScrollView
+      style={styles.containerScroll}
+      contentContainerStyle={styles.contentContainer}>
+      <View style={styles.container}>
+        {/* Background Gradient Effect */}
+        <View style={styles.backgroundGradient} />
 
-      {/* Features Section */}
-      <Animated.View 
-        style={[
-          styles.featuresContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
-        ]}
-      >
-        <View style={styles.feature}>
-          <View style={styles.featureIcon}>
-            <Icon name="people" size={24} color="#6366f1" />
+        {/* Header Section */}
+        <Animated.View
+          style={[
+            styles.header,
+            {
+              opacity: fadeAnim,
+              transform: [{translateY: slideAnim}, {scale: scaleAnim}],
+            },
+          ]}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoIcon}>
+              <Icon name="school" size={40} color="#fff" />
+            </View>
+            <Text style={styles.logoText}>MentorConnect</Text>
           </View>
-          <Text style={styles.featureTitle}>Find Mentors</Text>
-          <Text style={styles.featureDescription}>
-            Connect with experienced professionals in your field
+
+          <Text style={styles.tagline}>Connect, Learn, and Grow Together</Text>
+        </Animated.View>
+
+        {/* Features Section */}
+        <Animated.View
+          style={[
+            styles.featuresContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{translateY: slideAnim}],
+            },
+          ]}>
+          <View style={styles.feature}>
+            <View style={styles.featureIcon}>
+              <Icon name="people" size={24} color="#6366f1" />
+            </View>
+            <Text style={styles.featureTitle}>Find Mentors</Text>
+            <Text style={styles.featureDescription}>
+              Connect with experienced professionals in your field
+            </Text>
+          </View>
+
+          <View style={styles.feature}>
+            <View style={styles.featureIcon}>
+              <Icon name="schedule" size={24} color="#10b981" />
+            </View>
+            <Text style={styles.featureTitle}>Book Sessions</Text>
+            <Text style={styles.featureDescription}>
+              Schedule one-on-one mentoring sessions at your convenience
+            </Text>
+          </View>
+
+          <View style={styles.feature}>
+            <View style={styles.featureIcon}>
+              <Icon name="chat" size={24} color="#f59e0b" />
+            </View>
+            <Text style={styles.featureTitle}>Real-time Chat</Text>
+            <Text style={styles.featureDescription}>
+              Stay connected with instant messaging and video calls
+            </Text>
+          </View>
+        </Animated.View>
+
+        {/* Action Buttons */}
+        <Animated.View
+          style={[
+            styles.actionsContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{translateY: slideAnim}],
+            },
+          ]}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => navigation.navigate('Register')}
+            activeOpacity={0.8}>
+            <Text style={styles.primaryButtonText}>Get Started</Text>
+            <Icon
+              name="arrow-forward"
+              size={20}
+              color="#fff"
+              style={styles.buttonIcon}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => navigation.navigate('Login')}
+            activeOpacity={0.8}>
+            <Text style={styles.secondaryButtonText}>
+              I already have an account
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Footer */}
+        <Animated.View style={[styles.footer, {opacity: fadeAnim}]}>
+          <Text style={styles.footerText}>
+            By continuing, you agree to our{' '}
+            <Text style={styles.footerLink}>Terms of Service</Text> and{' '}
+            <Text style={styles.footerLink}>Privacy Policy</Text>
           </Text>
-        </View>
-
-        <View style={styles.feature}>
-          <View style={styles.featureIcon}>
-            <Icon name="schedule" size={24} color="#10b981" />
-          </View>
-          <Text style={styles.featureTitle}>Book Sessions</Text>
-          <Text style={styles.featureDescription}>
-            Schedule one-on-one mentoring sessions at your convenience
-          </Text>
-        </View>
-
-        <View style={styles.feature}>
-          <View style={styles.featureIcon}>
-            <Icon name="chat" size={24} color="#f59e0b" />
-          </View>
-          <Text style={styles.featureTitle}>Real-time Chat</Text>
-          <Text style={styles.featureDescription}>
-            Stay connected with instant messaging and video calls
-          </Text>
-        </View>
-      </Animated.View>
-
-      {/* Action Buttons */}
-      <Animated.View 
-        style={[
-          styles.actionsContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={() => navigation.navigate('Register')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.primaryButtonText}>Get Started</Text>
-          <Icon name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.secondaryButton}
-          onPress={() => navigation.navigate('Login')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.secondaryButtonText}>I already have an account</Text>
-        </TouchableOpacity>
-      </Animated.View>
-
-      {/* Footer */}
-      <Animated.View 
-        style={[
-          styles.footer,
-          { opacity: fadeAnim }
-        ]}
-      >
-        <Text style={styles.footerText}>
-          By continuing, you agree to our{' '}
-          <Text style={styles.footerLink}>Terms of Service</Text>
-          {' '}and{' '}
-          <Text style={styles.footerLink}>Privacy Policy</Text>
-        </Text>
-      </Animated.View>
-    </View>
+        </Animated.View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  containerScroll: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+  },
+  contentContainer: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f9fafb',
@@ -213,7 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -254,7 +258,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     shadowColor: '#6366f1',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,

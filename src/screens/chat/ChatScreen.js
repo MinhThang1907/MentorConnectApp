@@ -40,7 +40,7 @@ export default function ChatScreen({navigation, route}) {
   const fetchOtherUser = async () => {
     try {
       const userDoc = await firestore().collection('users').doc(userId).get();
-      if (userDoc.exists) {
+      if (userDoc.exists()) {
         setOtherUser({id: userId, ...userDoc.data()});
       }
     } catch (error) {
@@ -59,7 +59,7 @@ export default function ChatScreen({navigation, route}) {
           .collection('conversations')
           .doc(conversationId);
         const conversationDoc = await conversationRef.get();
-        if (conversationDoc.exists) {
+        if (conversationDoc.exists()) {
           setConversation({id: conversationDoc.id, ...conversationDoc.data()});
         }
       } else {
@@ -80,7 +80,6 @@ export default function ChatScreen({navigation, route}) {
         if (foundConversation) {
           setConversation(foundConversation);
         } else {
-          // Create new conversation
           const newConversationData = {
             participants: [currentUser.uid, userId],
             createdAt: firestore.FieldValue.serverTimestamp(),

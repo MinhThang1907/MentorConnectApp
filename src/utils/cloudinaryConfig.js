@@ -2,10 +2,10 @@ import Config from 'react-native-config';
 
 // Cloudinary configuration
 export const CLOUDINARY_CONFIG = {
-  cloudName: Config.cloudName, // Thay bằng cloud name của bạn
-  uploadPreset: Config.uploadPreset, // Thay bằng upload preset của bạn
-  apiKey: Config.apiKey, // Thay bằng API key của bạn
-  apiSecret: Config.apiSecret, // Chỉ dùng cho server-side
+  cloudName: Config.cloudName,
+  uploadPreset: Config.uploadPreset,
+  apiKey: Config.apiKey,
+  apiSecret: Config.apiSecret,
 };
 
 // Upload image to Cloudinary
@@ -26,15 +26,6 @@ export const uploadImageToCloudinary = async (
     formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
     formData.append('folder', folder);
     formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
-
-    // Optional: Add transformation parameters
-    // formData.append(
-    //   'transformation',
-    //   JSON.stringify([
-    //     {width: 400, height: 400, crop: 'fill', gravity: 'face'},
-    //     {quality: 'auto', fetch_format: 'auto'},
-    //   ]),
-    // );
 
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`,

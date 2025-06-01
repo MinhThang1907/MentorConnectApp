@@ -44,7 +44,7 @@ export default function UserProfileScreen({navigation, route}) {
   const fetchUserData = async () => {
     try {
       const userDoc = await firestore().collection('users').doc(userId).get();
-      if (userDoc.exists) {
+      if (userDoc.exists()) {
         setUser({id: userId, ...userDoc.data()});
       }
     } catch (error) {
@@ -118,7 +118,7 @@ export default function UserProfileScreen({navigation, route}) {
           .doc(review.reviewerId)
           .get();
 
-        if (reviewerDoc.exists) {
+        if (reviewerDoc.exists()) {
           review.reviewer = reviewerDoc.data();
         }
 
@@ -139,7 +139,7 @@ export default function UserProfileScreen({navigation, route}) {
         .doc(`${currentUser.uid}_${userId}`)
         .get();
 
-      setIsFollowing(followDoc.exists);
+      setIsFollowing(followDoc.exists());
     } catch (error) {
       console.error('Error checking follow status:', error);
     }

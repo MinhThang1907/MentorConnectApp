@@ -33,7 +33,7 @@ function AppContent() {
         .doc(user.uid)
         .onSnapshot(
           doc => {
-            if (doc.exists) {
+            if (doc.exists()) {
               const userData = doc.data();
               setUserRole(userData.role || null);
             } else {
